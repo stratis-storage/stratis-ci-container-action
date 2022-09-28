@@ -1,0 +1,42 @@
+name: 'Stratisd Fedora Composite Action'
+description: 'Execute Fedora CI tasks in container'
+inputs:
+  image:
+    description: "Container image to use"
+    required: true
+  components:
+    description: "Cargo components to use"
+    required: true
+    default: "cargo"
+  toolchain:
+    description: "Version of the rust toolchain to use"
+    required: true
+  task:
+    description: "The test task to run in the container"
+    required: true
+  deps:
+    description: "Command to install dependencies in the container"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions-rs/toolchain@v1
+      with:
+        components: ${{ inputs.components }}
+        toolchain: ${{ inputs.toolchain }}
+        override: true
+    - uses: addnab/docker-run-action@v3
+      with:
+        image: ${{ inputs.image }}
+        options: --privileged -v /dev:/dev -v /home:/home -v /sys:/sys -v ${{ github.workspace }}:/work
+        shell: bash
+        run: |
+          export PATH="$PATH:/home/runner/.cargo/bin/"
+          export DEBIAN_FRONTEND=noninteractive
+          ${{ inputs.deps }}
+          rustup toolchain install ${{ inputs.toolchain }} --component ${{ inputs.components }}
+          rustup override set ${{ inputs.toolchain }}
+          cd /work
+          make -f Makefile build-and-install
+          coproc /usr/lib/systemd/systemd-udevd
+          ${{ inputs.task }}
