@@ -54,7 +54,7 @@ run before the container task.
           sudo systemctl stop systemd-udevd
           sudo systemctl disable systemd-udevd-kernel.socket
           sudo systemctl disable systemd-udevd-control.socket
-      - uses: bmr-cymru/stratis-ci-container-action@v1
+      - uses: stratis-storage/stratis-ci-container-action@v1
         with:
           image: fedora:36
           components: ${{ matrix.components }}
