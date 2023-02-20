@@ -37,6 +37,7 @@ runs:
           rustup toolchain install ${{ inputs.toolchain }} --component ${{ inputs.components }}
           rustup override set ${{ inputs.toolchain }}
           cd /work
-          make -f Makefile build-and-install
+          make -f Makefile build-all
+          make -f Makefile install
           coproc /usr/lib/systemd/systemd-udevd
           ${{ inputs.task }}
